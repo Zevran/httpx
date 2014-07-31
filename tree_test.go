@@ -1,5 +1,0 @@
-package tradix
-
-import (
-	"testing"
-)

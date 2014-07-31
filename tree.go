@@ -1,6 +1,0 @@
-package tradix
-
-import (
-
-	"sync"
-)
