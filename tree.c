@@ -127,11 +127,47 @@ void		updateMaxParams(t_TreeNode *node)
 
 t_TreeNode**	addChild(t_TreeNode **children, t_TreeNode *child)
 {
+	int			len;
+	t_TreeNode	**tmpChildren;
+
+	len  = nodearraylen(children);
+	if (len == 0)
+	{
+		children = (t_TreeNode **) malloc(sizeof(t_TreeNode) * 1);
+		*children = child;
+	}
+	else if (len > 0)
+	{
+		tmpChildren = (t_TreeNode **) malloc(sizeof(t_TreeNode) * (len + 1));
+		while (children && *children)
+			*tmpChildren++ = *children++;
+		*tmpChildren = child;
+		free(children);
+		children = tmpChildren;
+	}
 	return (children);
 }
 
 char**			addIndice(char **indices, char *indice)
 {
+	int		len;
+	char	**tmpArray;
+
+	len = arraylen(indices);
+	if (len == 0)
+	{
+		indices = (char **) malloc(sizeof(char **) * 1);
+		strcpy(*indices, indice);
+	}
+	else if (len > 0)
+	{
+		tmpArray = (char **) malloc(sizeof(char *) * (len + 1));
+		while (indices && *indices)
+			strcpy(*tmpArray++, *indices++);
+		*tmpArray = indice;
+		free(indices);
+		indices = tmpArray;
+	}
 	return (indices);
 }
 
@@ -171,7 +207,8 @@ void		addRoute(t_TreeNode *node, char *path, void *handle)
 				node.Handle = NULL;
 				node.WildChild = false;
 			}
-			if (i < strlen(path) {
+			if (i < strlen(path))
+			{
 				path = &path[i];
 				if (node->WildChild == true)
 				{
