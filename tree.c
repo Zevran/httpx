@@ -11,6 +11,27 @@ int		getMin(int a, int b)
 	return (b);
 }
 
+char	*strsub(char const *s1, unsigned int start, size_t len)
+{
+	size_t	slen;
+	char	*p_s1;
+	char	*p_ret;
+	char	*ret;
+
+	slen = strlen(s1);
+	if (((start + len) > slen))
+		return (NULL);
+	ret = (char *) malloc(sizeof(char) * len);
+	if (!ret)
+		return (NULL);
+	p_s1 = (char *)(s1 + start);
+	p_ret = ret;
+	while (len--)
+		*(p_ret++) = *(p_s1++);
+	*p_ret = '\0';
+	return (ret);
+}
+
 unsigned int	countParams(char *path)
 {
 	unsigned int	i;
@@ -79,7 +100,7 @@ int			arraylen(char **array)
 	return (index);
 }
 
-char**		arraycpy(char **dest, char **src)
+char			**arraycpy(char **dest, char **src)
 {
 	int	len;
 
@@ -101,7 +122,7 @@ int				nodearraylen(t_TreeNode **node)
 	return (index);
 }
 
-t_TreeNode**	nodearraycpy(t_TreeNode **dest, t_TreeNode **src)
+t_TreeNode		**nodearraycpy(t_TreeNode **dest, t_TreeNode **src)
 {
 	int len;
 
@@ -112,7 +133,7 @@ t_TreeNode**	nodearraycpy(t_TreeNode **dest, t_TreeNode **src)
 	return (dest);
 }
 
-void		updateMaxParams(t_TreeNode *node)
+void			updateMaxParams(t_TreeNode *node)
 {
 	int	i;
 
@@ -125,7 +146,7 @@ void		updateMaxParams(t_TreeNode *node)
 	}
 }
 
-t_TreeNode**	addChild(t_TreeNode **children, t_TreeNode *child)
+t_TreeNode		**addChild(t_TreeNode **children, t_TreeNode *child)
 {
 	int			len;
 	t_TreeNode	**tmpChildren;
@@ -148,7 +169,7 @@ t_TreeNode**	addChild(t_TreeNode **children, t_TreeNode *child)
 	return (children);
 }
 
-char**			addIndice(char **indices, char *indice)
+char		**addIndice(char **indices, char *indice)
 {
 	int		len;
 	char	**tmpArray;
@@ -174,7 +195,7 @@ char**			addIndice(char **indices, char *indice)
 void		addRoute(t_TreeNode *node, char *path, void *handle)
 {
 	int		numParams, i, j;
-	char	*delimiter;
+	char	delimiter;
 	t_TreeNode	*child;
 
 	if (node == NULL)
@@ -224,7 +245,7 @@ void		addRoute(t_TreeNode *node, char *path, void *handle)
 					}
 					exit(-1);
 				}
-				strcpy(delimiter, &path[0])
+				delimiter = path[0];
 				if (node->NodeType == Param && delimiter == '/' && nodearraylen(node->Children) == 1)
 				{
 					node = node->Children[0];
@@ -251,7 +272,7 @@ void		addRoute(t_TreeNode *node, char *path, void *handle)
 					incrementChildPriority(arraylen(node->Indices) - 1);
 					node = child;
 				}
-				insertChild(numParams, path, handle);
+				insertChild(node, numParams, path, handle);
 				return ;
 			}
 			else if (i == strlen(path))
@@ -265,7 +286,89 @@ void		addRoute(t_TreeNode *node, char *path, void *handle)
 	}
 	else
 	{
-		insertChild(numParams, path, handle);
+		insertChild(node, numParams, path, handle);
 	}
 }
 
+void	insertChild(t_TreeNode *node, int numParams, char *string, void handle)
+{
+	int 		offset, index, max, end;
+	char		delimiter;
+	t_TreeNode	*child;
+
+	index = 0;
+	max = strlen(path);
+	while (numParams > 0)
+	{
+		delimiter = path[i];
+		if (delimiter != ':' && delimiter != '*')
+		{
+			i++;
+			continue ;
+		}
+		if (nodearraylen(node->Children) > 0)
+			exit(-1);
+		end = i + 1;
+		while (end < max && path[end] != '/')
+			end++;
+		if ((end - i) < 2)
+			exit(-1);
+		if (delimiter == ':')
+		{
+			if (i > 0)
+			{
+				node->Path = strsub(path, offset, i);
+				offset = i;
+			}
+			child = (t_TreeNode *) malloc(sizeof(t_TreeNode));
+			child->NodeType = Param;
+			child->MaxParams = numParams;
+			addChild(node->Children, child);
+			node->WildChild = true;
+			node = child;
+			node->Priority++;
+			numParams--;
+			if (end < max)
+			{
+				node->Path = strsub(path, offset, i);
+				offset = end;
+				child = (t_TreeNode *) malloc(sizeof(t_TreeNode));
+				child->MaxParams = numParams;
+				child->Priority = 1;
+				addChild(node, child);
+				node = child;
+			}
+		}
+		else
+		{
+			if (end != max || numParams > 1)
+				exit(-1);
+			if (strlen(node.Path) > 0 && node.Path[strlen(node.Path) - 1] == '/')
+				exit(-1);
+			i--;
+			if (path[i] != '/')
+				exit(-1);
+			node->Path = strsub(path, offset, i);
+			child = (t_TreeNode *) malloc(sizeof(t_TreeNode));
+			child->WildChild = true;
+			child->NodeType = CatchAll;
+			child->MaxParams = 1;
+			addChild(node->Children, child);
+			addIndice(node->Indices, &path[i]);
+			node = child;
+			node->Priority++;
+
+			child = (t_TreeNode *) malloc(sizeof(t_TreeNode));
+			child->Path = &path[i];
+			child->NodeType = CatchAll;
+			child->MaxParams = 1;
+			child->Handle = handle;
+			child->Priority = 1;
+			addChild(node->Children, child);
+			return ;
+		}
+		i++;
+	}
+	node->Path = &path[offset];
+	node->Handle = handle;
+}
